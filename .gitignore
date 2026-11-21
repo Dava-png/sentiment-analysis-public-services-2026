@@ -1,0 +1,50 @@
+# ==========================================
+# PYTHON & KERNEL CACHE
+# ==========================================
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# ==========================================
+# VIRTUAL ENVIRONMENTS
+# ==========================================
+venv/
+ENV/
+env/
+.venv/
+
+# ==========================================
+# IDE & SYSTEM METADATA (macOS & VS Code)
+# ==========================================
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+.ipynb_checkpoints/
+
+
+dataset_mobile_jkn_2026.csv
+dataset_signal_2026.csv
+dataset_mpaspor_2026.csv
+
+# Model hasil训练 yang berukuran besar (.pkl / .h5 / direktori Hugging Face)
+*.pkl
+*.h5
+model_output/
