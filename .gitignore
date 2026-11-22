@@ -43,6 +43,8 @@ Thumbs.db
 dataset_mobile_jkn_2026.csv
 dataset_signal_2026.csv
 dataset_mpaspor_2026.csv
+sampel_anotasi_kappa(Alen).xlsx
+sampel_anotasi_kappa(Dava).xlsx
 
 # Model hasil训练 yang berukuran besar (.pkl / .h5 / direktori Hugging Face)
 *.pkl

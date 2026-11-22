@@ -3,52 +3,35 @@ import pandas as pd
 
 # Konfigurasi Direktori & Parameter Utama
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-CLEANING_DIR = os.path.abspath(os.path.join(BASE_DIR, "../CleaningDataset"))
+INPUT_FILE = os.path.join(BASE_DIR, "../MergeDataset/dataset_master_gabungan_2026.csv")
+OUTPUT_FILE = os.path.join(BASE_DIR, "sampel_anotasi_kappa.csv")
 
-DATASETS = {
-    "Mobile JKN": os.path.join(CLEANING_DIR, "clean_mobile_jkn_2026.csv"),
-    "SIGNAL": os.path.join(CLEANING_DIR, "clean_signal_2026.csv"),
-    "M-Paspor": os.path.join(CLEANING_DIR, "clean_m-paspor_2026.csv"),
-}
-
-TARGET_SAMPLE_LARGE = 1500
+# Ukuran sampel untuk uji Cohen's Kappa (standar umum: 250 data)
+SAMPLE_SIZE = 250
 RANDOM_SEED = 42
 
-print("=== PROSES STRATIFIED RANDOM SAMPLING (SRA) ===\n")
+print("PROSES SAMPLING UNTUK ANOTASI (COHEN'S KAPPA)\n")
 
-for app_name, filepath in DATASETS.items():
-  df = pd.read_csv(filepath)
-  total_populasi = len(df)
+if os.path.exists(INPUT_FILE):
+  df_master = pd.read_csv(INPUT_FILE)
+  total_data = len(df_master)
 
-  # Pastikan kolom score bertipe numerik
-  df["score"] = pd.to_numeric(df["score"], errors="coerce")
+  # Pastikan n tidak melebihi total populasi master
+  n_take = min(SAMPLE_SIZE, total_data)
 
-  # Logika SRA vs Sensus
-  if total_populasi > TARGET_SAMPLE_LARGE:
-    sampled_strata = []
-    for _, group in df.groupby("score"):
-      # Rumus Alokasi Proporsional SRA
-      n_strata = max(
-          1, int(round(TARGET_SAMPLE_LARGE * len(group) / total_populasi))
-      )
-      sampled_strata.append(
-          group.sample(n=min(n_strata, len(group)), random_state=RANDOM_SEED)
-      )
-    df_sample = pd.concat(sampled_strata).reset_index(drop=True)
-    metode = "Stratified Random Sampling (SRA)"
-  else:
-    df_sample = df.copy()
-    metode = "Total Sampling / Sensus (< 1.500 data)"
+  # Simple Random Sampling dari master gabungan
+  df_sample = df_master.sample(n=n_take, random_state=RANDOM_SEED).reset_index(
+      drop=True
+  )
 
-  # Simpan file hasil sampling
-  filename = f"sample_{app_name.lower().replace(' ', '_').replace('-', '_')}_2026.csv"
-  df_sample.to_csv(filename, index=False, encoding="utf-8-sig")
+  # Simpan file hasil sampel anotasi
+  df_sample.to_csv(OUTPUT_FILE, index=False, encoding="utf-8-sig")
 
-  # Ringkasan Eksekusi Bersih
-  print(f"[{app_name}]")
-  print(f"  - Metode        : {metode}")
-  print(f"  - Populasi Awal : {total_populasi:,}")
-  print(f"  - Sampel Terambil: {len(df_sample):,}")
-  print(f"  - Output File   : {filename}\n")
-
-print("SEMUA SAMPLING BERHASIL DIPROSES")
+  print(f"[SUKSES]")
+  print(f"  - Total Populasi Master : {total_data:,}")
+  print(f"  - Sampel Terambil (n)   : {len(df_sample):,}")
+  print(f"  - Output File           : {os.path.basename(OUTPUT_FILE)}")
+else:
+  print(
+      f"[GAGAL] File '{os.path.basename(INPUT_FILE)}' tidak ditemukan."
+  )
