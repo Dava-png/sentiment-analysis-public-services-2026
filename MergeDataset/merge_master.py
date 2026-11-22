@@ -1,36 +1,47 @@
-import pandas as pd
 import os
+import pandas as pd
 
-# Mengunci direktori dasar tempat skrip berada
+# Konfigurasi Direktori Dasar
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 # Daftar file sampel per aplikasi yang akan digabung
-SAMPLE_FILES = [
-    os.path.join(BASE_DIR, "../sample_mobile_jkn_2026.csv"),
-    os.path.join(BASE_DIR, "sample_signal_2026.csv"),
-    os.path.join(BASE_DIR, "sample_m-paspor_2026.csv")
-]
+SAMPLE_FILES = {
+    "Mobile JKN": os.path.join(BASE_DIR, "../SamplingDataset/sample_mobile_jkn_2026.csv"),
+    "SIGNAL": os.path.join(BASE_DIR, "../SamplingDataset/sample_signal_2026.csv"),
+    "M-Paspor": os.path.join(BASE_DIR, "../SamplingDataset/sample_m_paspor_2026.csv"),
+}
 
-sampled_datasets = []
+print("=== PROSES MERGE DATASET SAMPEL ===\n")
 
-print("=== PROSES PENGGABUNGAN DATASET MASTER (T1.4) ===\n")
+dfs = []
+for app_name, filepath in SAMPLE_FILES.items():
+  if os.path.exists(filepath):
+    df_temp = pd.read_csv(filepath)
+    dfs.append(df_temp)
+    print(f"[{app_name}] Berhasil dimuat: {len(df_temp):,} baris")
+  else:
+    print(
+        f"[{app_name}] [GAGAL] File tidak ditemukan di path: {filepath}. Pastikan"
+        " tahap sampling sudah dijalankan!"
+    )
 
-for filepath in SAMPLE_FILES:
-    try:
-        df_sample = pd.read_csv(filepath)
-        sampled_datasets.append(df_sample)
-        print(f"Berhasil memuat: {os.path.basename(filepath)} ({len(df_sample):,} baris)")
-    except FileNotFoundError:
-        print(f"[PERINGATAN] File '{filepath}' tidak ditemukan. Pastikan skrip sampling sudah dijalankan sebelumnya.")
+if dfs:
+  # Gabungkan seluruh dataframe sampel secara vertikal
+  df_master = pd.concat(dfs, ignore_index=True)
 
-if sampled_datasets:
-    # Menggabungkan seluruh dataframe sampel menjadi satu (concatenation)
-    df_master = pd.concat(sampled_datasets, ignore_index=True)
-    
-    # Simpan ke file master akhir
-    master_filename = "dataset_master_2026.csv"
-    df_master.to_csv(master_filename, index=False, encoding="utf-8-sig")
-    
-    print(f"\n=== PENGGABUNGAN SELESAI ===")
-    print(f"Total keseluruhan baris pada dataset master: {len(df_master):,} baris")
-    print(f"Disimpan sebagai: {master_filename}")
+  # Mengacak baris (shuffling) agar data dari berbagai aplikasi tercampur merata
+  df_master = df_master.sample(frac=1, random_state=42).reset_index(drop=True)
+
+  # Simpan sebagai file master gabungan
+  output_filename = "dataset_master_gabungan_2026.csv"
+  output_path = os.path.join(BASE_DIR, output_filename)
+  df_master.to_csv(output_path, index=False, encoding="utf-8-sig")
+
+  print(f"\n[SUKSES] Penggabungan Selesai!")
+  print(f"  - Total Keseluruhan Data : {len(df_master):,}")
+  print(f"  - Disimpan sebagai       : {output_filename}")
+else:
+  print(
+      "\n[GAGAL TOTAL] Tidak ada file sampel yang dapat digabungkan. Periksa"
+      " kembali file sumbernya."
+  )
