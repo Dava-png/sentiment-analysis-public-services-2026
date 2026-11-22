@@ -6,9 +6,9 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 # Daftar file sampel per aplikasi yang akan digabung
 SAMPLE_FILES = [
-    os.path.join(BASE_DIR, "../SamplingDataset/sample_mobile_jkn_2026.csv"),
-    os.path.join(BASE_DIR, "../SamplingDataset/sample_signal_2026.csv"),
-    os.path.join(BASE_DIR, "../SamplingDataset/sample_m-paspor_2026.csv")
+    os.path.join(BASE_DIR, "../sample_mobile_jkn_2026.csv"),
+    os.path.join(BASE_DIR, "sample_signal_2026.csv"),
+    os.path.join(BASE_DIR, "sample_m-paspor_2026.csv")
 ]
 
 sampled_datasets = []
